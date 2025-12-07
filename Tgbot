@@ -1,0 +1,177 @@
+import logging
+from telegram import Update, ReplyKeyboardMarkup, InlineKeyboardMarkup, InlineKeyboardButton
+from telegram.ext import (
+    Application,
+    CommandHandler,
+    MessageHandler,
+    CallbackQueryHandler,
+    filters,
+    ContextTypes
+)
+
+logging.basicConfig(
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', 
+    level=logging.INFO
+)
+logger = logging.getLogger(__name__)  
+
+TOKEN = ''
+
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    keyboard = [
+        ["🎓 Специальности", "📅 Расписание"],
+        ["🏢 Контакты"],
+        ["📞 Связь с приемной комиссией", "📋 Правила приема"]
+    ]
+    
+    reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True, one_time_keyboard=False)
+    
+    await update.message.reply_text(
+        "🏫 Добро пожаловать в консультант техникума!\n"
+        "Выберите интересующий вас раздел:",
+        reply_markup=reply_markup
+    )
+
+async def handle_buttons(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    text = update.message.text
+    
+    if text == "🎓 Специальности":
+        # Инлайн-клавиатура для выбора направления
+        keyboard = [
+            [InlineKeyboardButton("💻 IT-направления", callback_data="spec_it")],
+            [InlineKeyboardButton("🔧 Технические специальности", callback_data="spec_tech")],
+            [InlineKeyboardButton("📊 Экономика и управление", callback_data="spec_economy")],
+            [InlineKeyboardButton("👨‍🏭 Профессиональное образование", callback_data="spec_prof")]
+        ]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        await update.message.reply_text("Выберите направление подготовки:", reply_markup=reply_markup)
+    
+    elif text == "📅 Расписание":
+        keyboard = [
+            [InlineKeyboardButton("🗓️ График учебного года", callback_data="schedule_year")],
+            [InlineKeyboardButton("📝 Расписание экзаменов", callback_data="schedule_exams")]
+        ]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        await update.message.reply_text("Какое расписание вас интересует?", reply_markup=reply_markup)
+    
+    elif text == "🏢 Контакты":
+        contact_info = """
+📞 *Контакты техникума:*
+        
+*Адрес:* г. Ижевск, ул. Молодежная 109
+*Телефон:* +7 (3412) 37-02-88
+*Email:* ikoopteh@mail.ru
+*Сайт:* https://koopteh.ru/
+
+⏰ *Часы работы:*
+Пн-Пт: 8:30 - 18:00
+Сб: 8:00 - 15:00
+Вс: выходной
+        """
+        await update.message.reply_text(contact_info, parse_mode='Markdown')
+    
+    elif text == "📞 Связь с приемной комиссией":
+        keyboard = [[InlineKeyboardButton("Написать в приемную комиссию", url="https://koopteh.ru/abiturientu")]]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        await update.message.reply_text(
+            "📞 *Приемная комиссия:*\n"
+            "*Телефон:* (3412)370288\n"
+            "*Email:* natalyvlad2013@yandex.ru\n"
+            "*Часы работы:* Пн-Пт 9:00-17:00",
+            reply_markup=reply_markup,
+            parse_mode='Markdown'
+        )
+    
+    elif text == "📋 Правила приема":
+        rules_text = """
+📋 *Правила приема 2024/2025 учебный год*
+
+*Необходимые документы:*
+1. Паспорт (копия)
+2. Аттестат (оригинал + копия)
+3. 4 фото 3×4
+4. Медицинская справка 086/у
+5. СНИЛС (копия)
+
+*Сроки приема:*
+• На базе 9 классов: 20 июня - 15 августа
+• На базе 11 классов: 20 июня - 10 августа
+        """
+        await update.message.reply_text(rules_text, parse_mode='Markdown')
+    
+    else:
+        await update.message.reply_text(
+            "Я не понимаю эту команду. Пожалуйста, используйте кнопки меню.",
+            reply_markup=ReplyKeyboardMarkup(
+                [
+                    ["🎓 Специальности", "📅 Расписание"],
+                    ["🏢 Контакты"],
+                    ["📞 Связь с приемной комиссией", "📋 Правила приема"]
+],
+                resize_keyboard=True
+            )
+        )
+
+async def handle_inline_buttons(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
+    
+    if query.data == "spec_it":
+        response = """
+💻 *IT-направления:*
+
+1. *09.02.07* - Информационные системы и программирование
+   • Квалификация: Разработчик веб и мультимедийных приложений
+   • Срок: 3 года 10 месяцев
+   
+        """
+    elif query.data == "spec_economy":
+        response = """
+📊 *Экономика и управление:*
+
+1. *38.02.01* - Экономика и бухгалтерский учет
+   • Квалификация: Бухгалтер
+   • Срок: 2 года 10 месяцев
+   
+2. *38.02.04* - Коммерция
+   • Квалификация: Менеджер по продажам
+   • Срок: 2 года 10 месяцев
+        """
+    
+    elif query.data == "schedule_year":
+        response = """
+🗓️ *График учебного года 2024/2025:*
+
+• *1 сентября* - Начало учебного года
+• *30 октября - 6 ноября* - Осенние каникулы
+• *28 декабря - 12 января* - Зимние каникулы
+• *24 марта - 31 марта* - Весенние каникулы
+• *31 мая* - Окончание учебного года
+        """
+    
+    elif query.data == "schedule_exams":
+        response = """
+📝 *Сессия летняя 2025:*
+
+• *26 мая - 7 июня* - Экзаменационная сессия
+• *9 июня - 21 июня* - Пересдачи
+• *23 июня* - Выдача дипломов выпускникам
+        """
+    
+    else:
+        response = "Информация временно недоступна"
+    
+    await query.edit_message_text(response, parse_mode='Markdown')
+
+def main():
+    application = Application.builder().token(TOKEN).build()
+    
+    application.add_handler(CommandHandler("start", start))
+    application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_buttons))
+    application.add_handler(CallbackQueryHandler(handle_inline_buttons))
+    
+    logger.info("Бот запущен...")
+    application.run_polling()
+
+if __name__ == '__main__':  
+    main()
