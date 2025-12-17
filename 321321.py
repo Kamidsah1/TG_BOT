@@ -5,7 +5,7 @@ from telegram.ext import Application, MessageHandler, ContextTypes, filters
 # Настройка логирования
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 
-BOT_TOKEN = '8453053819:AAEn6rpIeYSC-9JNxzx4uP74svDAZP2bRpQ'  # Вставьте ваш токен сюда
+BOT_TOKEN = ''  # Вставьте ваш токен сюда
 
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Обработка входящих сообщений"""
@@ -47,3 +47,4 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+
