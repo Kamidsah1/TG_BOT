@@ -12,7 +12,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Инициализация бота и диспетчера
-TOKEN = "8544076370:AAE4yZDY9Mxl6bWkEiEInx7eE64i1-2yk5Q"  # Замените на ваш токен
+TOKEN = ""  # Замените на ваш токен
 bot = Bot(token=TOKEN)
 dp = Dispatcher()
 router = Router()
@@ -205,3 +205,4 @@ async def main():
 if __name__ == "__main__":
     import asyncio
     asyncio.run(main())
+
